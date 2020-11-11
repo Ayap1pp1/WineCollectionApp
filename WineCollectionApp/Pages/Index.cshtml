@@ -1,0 +1,159 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div style="margin-left:50px; margin-right:50px;">
+    <div class="text-center">
+        <h1 class="display-4" style="background-color:cornsilk;">Welcome</h1>
+        <div class="text-left row">
+            <div class="col-md-3" >
+                <h2>
+                    All Producers
+                    <a asp-area="" asp-page="/Producer">
+                        <button type="button" class="btn btn-default" style="border-color: cadetblue;" aria-label="Left Align">
+                            <span aria-hidden="true">+</span>
+                        </button>
+                    </a>
+                </h2>
+                <ul id="producers" style="background-color: aliceblue;" />
+            </div>
+
+            <div class="col-md-9">
+                <h2>
+                    Bottles
+                    <a asp-area="" asp-page="/Bottle">
+                        <button type="button" class="btn btn-default" style="border-color: cadetblue;" aria-label="Left Align">
+                            <span aria-hidden="true">+</span>
+                        </button>
+                    </a>
+                </h2>
+
+                <table class="table" id="tblBottle"></table>
+            </div>
+        </div>
+
+
+        <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script> @*for ajaxcalls*@
+        <script>
+            var uri = 'api/producer/getall';
+
+            $(document).ready(function () {
+                // Send an AJAX request
+                $.getJSON(uri)
+                    .done(function (data) {
+                        // On success, 'data' contains a list of producers.
+                        $.each(data, function (key, item) {
+                            // Add a list item for the producer.
+
+                            var button = document.createElement("button");
+                            button.innerHTML = "Show bottles";
+                            button.classList.add("btn");
+                            button.classList.add("btn-primary");                            
+                            button.style = "float: right;";
+                            button.setAttribute("onclick", "getBottlesByProducerId(" + item.id + ")");
+
+                            var li = document.createElement("li");
+                            li.style = "height:40px;";
+                            li.appendChild(document.createTextNode(formatProducer(item)));
+                            li.appendChild(button);
+                            $('#producers').append(li);
+                        });
+                    });
+            });
+
+            function getBottlesByProducerId(id) {
+
+                $.getJSON('api/producer/' + id + '/GetBottles')
+                    .done(function (data) {
+                        // On success, 'data' contains a list of bottles.
+                        clearTable();
+                        if (data.length > 0) {
+                            var table = document.getElementById('tblBottle');
+                            createTableHead(data, table);
+                        }
+                        $.each(data, function (key, item) {
+                            // Add a list item for the bottles.
+                            createTableDataRow(item, table);
+                        });
+                    });
+            }
+
+            function deleteBottle(id) {
+                $.ajax({
+                    type: "DELETE",
+                    url: 'api/producer/DeleteBottle/' + id,
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+
+                $('#' + id).remove();
+            }
+
+
+            function createTableHead(data, table) {
+                var thead = document.createElement("thead");
+                var tr = document.createElement("tr");
+                thead.appendChild(tr);
+                table.appendChild(thead);
+
+                for (i in Object.keys(data[0])) {
+                    var colName = Object.keys(data[0])[i];
+                    createTableHeadColumn(table.tHead.children[0], colName);
+                }
+
+                //For the last column that contains the button
+                createTableHeadColumn(table.tHead.children[0], "");
+            }
+
+            function createTableHeadColumn(tr, columnName) {
+                var th = document.createElement("th");
+                th.innerHTML = columnName;
+                tr.appendChild(th);
+            }
+
+            function createTableDataRow(item, table) {
+
+                var rowNode = document.createElement("tr");
+
+                for (i in Object.keys(item)) {
+                    var name = Object.keys(item)[i];
+                    var value = item[name];
+
+                    if (name == "id") {
+                        rowNode.id = value; //so that we can identify the bottle row
+                    }
+
+                    var cellNode = document.createElement("td");
+                    var textNode = document.createTextNode(value);
+                    cellNode.appendChild(textNode);
+                    rowNode.appendChild(cellNode);
+                }
+
+                var button = document.createElement("button");
+                button.innerHTML = "Delete";
+                button.classList.add("btn");
+                button.classList.add("btn-danger");           
+                button.setAttribute("onclick", "deleteBottle(" + item.id + ")");
+
+                rowNode.appendChild(button);
+                table.appendChild(rowNode);
+            }
+
+            function clearTable() {
+                $('#tblBottle').empty();
+            }
+
+            function formatProducer(item) {
+                return item.name + ': ' + item.address;
+            };
+
+
+        </script>
+    </div>
+</div>

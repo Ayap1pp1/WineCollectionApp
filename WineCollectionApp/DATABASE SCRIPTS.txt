@@ -1,0 +1,129 @@
+Script to create database tables:
+-------------script 1----------------------------------------------------------------------------------------------
+/****** Script for creating database table producer. Change database name: "[WineCollection]" to whatever you call your DB******/
+USE [WineCollection]
+GO
+
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Producer](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[name] [nvarchar](200) NOT NULL,
+	[address] [nvarchar](1000) NULL,
+ CONSTRAINT [PK_Producer] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+-------------script 2----------------------------------------------------------------------------------------------
+/****** Script for creating database table bottle. Change database name: "[WineCollection]" to whatever you call your DB******/
+USE [WineCollection]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Bottle](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[producer_id] [int] NULL,
+	[name] [nvarchar](200) NOT NULL,
+	[year] [int] NULL,
+	[size] [int] NULL,
+	[style] [nvarchar](max) NULL,
+	[taste] [nvarchar](max) NULL,
+	[description] [nvarchar](1000) NULL,
+	[food_pairing] [nvarchar](1000) NULL,
+	[link] [nvarchar](max) NULL,
+ CONSTRAINT [PK_Bottle] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Bottle]  WITH CHECK ADD  CONSTRAINT [FK_Bottle_Producer] FOREIGN KEY([producer_id])
+REFERENCES [dbo].[Producer] ([id])
+GO
+
+ALTER TABLE [dbo].[Bottle] CHECK CONSTRAINT [FK_Bottle_Producer]
+GO
+
+
+-------------------------------------------------------------------------------------------------------------------
+Scripts for creating initial dummy data:
+-------------script 3----------------------------------------------------------------------------------------------
+/****** Script for inserting dummy data. Change database name: "[WineCollection]" to whatever you call your DB******/
+
+
+USE [WineCollection]
+GO
+
+INSERT INTO [dbo].[Producer]
+           ([name]
+           ,[address])
+     VALUES
+           ('Campo Viejo'
+           ,'Rioja, Spain')
+GO
+
+
+-------------script 4----------------------------------------------------------------------------------------------
+/****** Script for inserting dummy data. Change database name: "[WineCollection]" to whatever you call your DB******/
+USE [WineCollection]
+GO
+
+INSERT INTO [dbo].[Bottle]
+           ([producer_id]
+           ,[name]
+           ,[year]
+           ,[size]
+           ,[style]
+           ,[taste]
+           ,[description]
+           ,[food_pairing]
+           ,[link])
+     VALUES
+           (1
+           ,'Reserva'
+           ,2015
+           ,750
+           ,'Red wine'
+           ,'Oaky, dark cherries, cinnamon, plum, dill and vanilla.'
+           ,'Smells of oak, dark cherries, chocolate, plum, vanilla and dill.'
+           ,'16-18°C, pork, lamb or beef.'
+           ,'www.systembolaget.se/produkt/vin/campo-viejo-608301/')
+GO
+
+
+INSERT INTO [dbo].[Bottle]
+           ([producer_id]
+           ,[name]
+           ,[year]
+           ,[size]
+           ,[style]
+           ,[taste]
+           ,[description]
+           ,[food_pairing]
+           ,[link])
+     VALUES
+           (1
+           ,'Crianza'
+           ,2017
+           ,750
+           ,'Red wine'
+           ,'Spicy, oaky, dark cherries, cinnamon, raspberries and chocolate.'
+           ,'Smells of oak, dark cherries, cinnamon, raspberries and chocolate.'
+           ,'16-18°C, pork or lamb.'
+           ,'www.systembolaget.se/produkt/vin/campo-viejo-278601/')
+GO
